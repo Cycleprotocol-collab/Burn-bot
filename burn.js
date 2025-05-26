@@ -1,4 +1,4 @@
-// burn-daily-12utc.js - Burn 50% of token balance every day at 12:00 UTC
+// burn-daily-12utc.js - Burn 50% of token balance every day at 12:00 UTC & tweet result
 
 const {
   Connection,
@@ -13,13 +13,22 @@ const {
   getAccount,
 } = require('@solana/spl-token');
 const schedule = require('node-schedule');
+const { TwitterApi } = require('twitter-api-v2');
 require('dotenv').config();
 
-// --- Config ---
+// --- Setup ---
 const connection = new Connection(process.env.SOLANA_RPC_URL, 'confirmed');
 const privateKeyArray = Uint8Array.from(JSON.parse(process.env.PRIVATE_KEY));
 const wallet = Keypair.fromSecretKey(privateKeyArray);
 const TARGET_TOKEN_MINT = new PublicKey(process.env.TARGET_TOKEN_MINT);
+
+// --- Twitter ---
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY,
+  appSecret: process.env.TWITTER_API_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
+});
 
 // --- Logging ---
 function logInfo(...args) {
@@ -58,9 +67,23 @@ async function burnHalfTokenBalance() {
     const burnIx = createBurnInstruction(ata, TARGET_TOKEN_MINT, wallet.publicKey, burnAmount);
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    const tx = new Transaction({ feePayer: wallet.publicKey, recentBlockhash: blockhash }).add(burnIx);
+    const tx = new Transaction({
+      feePayer: wallet.publicKey,
+      recentBlockhash: blockhash,
+    }).add(burnIx);
+
     const sig = await sendAndConfirmTransaction(connection, tx, [wallet]);
-    logSuccess(`🔥 Burned 50% | Tx: https://solscan.io/tx/${sig}`);
+    const txUrl = `https://solscan.io/tx/${sig}`;
+    logSuccess(`🔥 Burned | Tx: ${txUrl}`);
+
+    // Tweet it
+    try {
+      await twitterClient.v2.tweet(`🔥 Burn successful! 50% of token balance destroyed.\nTx: ${txUrl}\n#Solana #BurnBot`);
+      logSuccess('📤 Tweet posted.');
+    } catch (tweetErr) {
+      logError('Twitter post failed:', tweetErr.message);
+    }
+
   } catch (err) {
     logError('Burn error:', err.message);
   }
