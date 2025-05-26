@@ -2,11 +2,11 @@
 # Cycle
 
 
-Automated buy-and-burn protocol for decentralized ecosystems. Leverages algorithmic trading and tokenomics to systematically purchase and burn tokens, reducing supply and enhancing token value.
+Automated buy-and-burn protocol for decentralized ecosystems. Systematically burns tokens, reducing supply and enhancing token value.
 
 ## 🚀 Features
 - Automated burn at specified intervals.
-- Configurable burn ratios and buy intervals.
+- Configurable burn ratios and intervals.
 - Dynamic supply control and token burning.
 - Wallet balance monitoring to optimize burn cycles.
 
