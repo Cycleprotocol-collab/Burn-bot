@@ -9,6 +9,7 @@ Automated buy-and-burn protocol for decentralized ecosystems. Systematically bur
 - Configurable burn ratios and intervals.
 - Dynamic supply control and token burning.
 - Wallet balance monitoring to optimize burn cycles.
+- X log sharing via automated tweet. 
 
 ---
 
